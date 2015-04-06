@@ -116,6 +116,7 @@ public class LettresPane extends Region {
         else if(mode == 2){
             timeline.getKeyFrames().add(new KeyFrame(Duration.seconds(15), (ActionEvent event) -> {
                 curseurTexte -= letter.getBoundsInLocal().getWidth();
+                curseurTexte = Math.max(curseurTexte, 0.0);
                 getChildren().remove(letter);      
             }, new KeyValue(letter.translateXProperty(), curseurTexte, INTERPOLATOR), new KeyValue(letter.translateYProperty(),  getHeight() - letter.getBoundsInLocal().getHeight(), INTERPOLATOR), new KeyValue(letter.opacityProperty(), 75f)));
             curseurTexte += (letter.getBoundsInLocal().getWidth());
