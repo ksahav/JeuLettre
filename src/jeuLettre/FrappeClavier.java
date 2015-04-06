@@ -34,11 +34,8 @@ public class FrappeClavier extends Application {
 
     public void play() {
         // request focus so we get key events
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                lettersPane.requestFocus();
-            }
+        Platform.runLater(() -> {
+            lettersPane.requestFocus();
         });
     }
 

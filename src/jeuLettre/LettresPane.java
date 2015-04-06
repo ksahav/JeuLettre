@@ -10,11 +10,9 @@ import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.VPos;
-import javafx.scene.Node;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
@@ -33,7 +31,7 @@ public class LettresPane extends Region {
     private static final Font FONT_DEFAULT = new Font(Font.getDefault().getFamily(), 200);
     private static final Random RANDOM = new Random();
     private static final Interpolator INTERPOLATOR = Interpolator.SPLINE(0.295, 0.800, 0.305, 1.000);
-    private Text pressText;
+    private final Text pressText;
     private double curseurTexte;
     private int mode = 1;
 
@@ -41,19 +39,13 @@ public class LettresPane extends Region {
         setId("LettersPane");
         setPrefSize(width, height);
         setFocusTraversable(true);
-        setOnMousePressed(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent me) {
-                requestFocus();
-                me.consume();
-            }
+        setOnMousePressed((MouseEvent me) -> {
+            requestFocus();
+            me.consume();
         });
-        setOnKeyPressed(new EventHandler<KeyEvent>() {
-            @Override
-            public void handle(KeyEvent ke) {
-                listen(ke.getText());
-                ke.consume();
-            }
+        setOnKeyPressed((KeyEvent ke) -> {
+            listen(ke.getText());
+            ke.consume();
         });
         // create press keys text
         pressText = new Text("Eléa");
@@ -118,24 +110,15 @@ public class LettresPane extends Region {
         // over 4 seconds move letter to random position and fade it out
         final Timeline timeline = new Timeline();
         if(mode == 1){
-        timeline.getKeyFrames().add(new KeyFrame(Duration.seconds(4), new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                // we are done remove us from scene
-                getChildren().remove(letter);
-
-            }
+        timeline.getKeyFrames().add(new KeyFrame(Duration.seconds(4), (ActionEvent event) -> {
+            getChildren().remove(letter);
         }, new KeyValue(letter.translateXProperty(), getRandom(0.0f, getWidth() - letter.getBoundsInLocal().getWidth()), INTERPOLATOR), new KeyValue(letter.translateYProperty(), getRandom(0.0f, getHeight() - letter.getBoundsInLocal().getHeight()), INTERPOLATOR), new KeyValue(letter.opacityProperty(), 0f)));
         }
         else if(mode == 2){
-            timeline.getKeyFrames().add(new KeyFrame(Duration.seconds(15), new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                // we are done remove us from scene
+            timeline.getKeyFrames().add(new KeyFrame(Duration.seconds(15), (ActionEvent event) -> {
                 getChildren().remove(letter);
                 curseurTexte = 0.0;
-            }
-        }, new KeyValue(letter.translateXProperty(), curseurTexte, INTERPOLATOR), new KeyValue(letter.translateYProperty(),  getHeight() - letter.getBoundsInLocal().getHeight(), INTERPOLATOR), new KeyValue(letter.opacityProperty(), 75f)));
+            }, new KeyValue(letter.translateXProperty(), curseurTexte, INTERPOLATOR), new KeyValue(letter.translateYProperty(),  getHeight() - letter.getBoundsInLocal().getHeight(), INTERPOLATOR), new KeyValue(letter.opacityProperty(), 75f)));
             curseurTexte += (letter.getBoundsInLocal().getWidth());
         }
         timeline.play();
