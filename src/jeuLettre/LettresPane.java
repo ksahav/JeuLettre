@@ -11,7 +11,6 @@ import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.VPos;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.input.KeyEvent;
@@ -31,10 +30,24 @@ public class LettresPane extends Region {
     private static final Font FONT_DEFAULT = new Font(Font.getDefault().getFamily(), 200);
     private static final Random RANDOM = new Random();
     private static final Interpolator INTERPOLATOR = Interpolator.SPLINE(0.295, 0.800, 0.305, 1.000);
-    private final Text pressText;
+    private Text pressText;
     private double curseurTexte;
     private int mode = 1;
 
+    private void titre(){
+    // create press keys text
+        pressText = new Text("Eléa");
+        pressText.setTextOrigin(VPos.TOP);
+        pressText.setFont(new Font(Font.getDefault().getFamily(), 40));
+        pressText.setLayoutY(5);
+        pressText.setFill(Color.rgb(80, 80, 80));
+        DropShadow effect = new DropShadow();
+        effect.setRadius(0);
+        effect.setOffsetY(1);
+        effect.setColor(Color.WHITE);
+        pressText.setEffect(effect);
+}
+    
     public LettresPane(double width, double height) {
         setId("LettersPane");
         setPrefSize(width, height);
@@ -47,28 +60,19 @@ public class LettresPane extends Region {
             listen(ke.getText());
             ke.consume();
         });
-        // create press keys text
-        pressText = new Text("Eléa");
-        pressText.setTextOrigin(VPos.TOP);
-        pressText.setFont(new Font(Font.getDefault().getFamily(), 40));
-        pressText.setLayoutY(5);
-        pressText.setFill(Color.rgb(80, 80, 80));
-        DropShadow effect = new DropShadow();
-        effect.setRadius(0);
-        effect.setOffsetY(1);
-        effect.setColor(Color.WHITE);
-        pressText.setEffect(effect);
+        titre();
         getChildren().add(pressText);
-    } // create press keys text
+    } 
 
     @Override
     protected void layoutChildren() {
-        
         pressText.setLayoutX((getWidth() - pressText.getLayoutBounds().getWidth()) / 2);
     }
 
     private void listen(String c) {
-        if (!c.matches("\\w")) {
+        if (c.matches("[\\w\\t\\n\\x0b\\fs]")) {
+            creerLettre(c);
+        } else {
             if ("&".equals(c)) {
                 this.mode = 1;
             }
@@ -78,11 +82,7 @@ public class LettresPane extends Region {
             if ("\r".equals(c)){
                 nettoyer();
             }
-
-        } else {
-            creerLettre(c);
         }
-
     }
 
     private void creerLettre(String c) {
@@ -98,8 +98,7 @@ public class LettresPane extends Region {
                 break;
             default :
                 fonteLettre = new Font(FONT_DEFAULT.getName(), getRandom(100.0, 200.0));
-                break;
-                    
+                break;   
         }
         
         letter.setFont(fonteLettre);
@@ -116,8 +115,8 @@ public class LettresPane extends Region {
         }
         else if(mode == 2){
             timeline.getKeyFrames().add(new KeyFrame(Duration.seconds(15), (ActionEvent event) -> {
-                getChildren().remove(letter);
-                curseurTexte = 0.0;
+                curseurTexte -= letter.getBoundsInLocal().getWidth();
+                getChildren().remove(letter);      
             }, new KeyValue(letter.translateXProperty(), curseurTexte, INTERPOLATOR), new KeyValue(letter.translateYProperty(),  getHeight() - letter.getBoundsInLocal().getHeight(), INTERPOLATOR), new KeyValue(letter.opacityProperty(), 75f)));
             curseurTexte += (letter.getBoundsInLocal().getWidth());
         }
@@ -129,8 +128,10 @@ public class LettresPane extends Region {
     }
 
     private void nettoyer() {
-           getChildren().clear();
-           curseurTexte =0.0;
+        getChildren().clear();
+        titre();
+        getChildren().add(pressText);
+        curseurTexte = 0.0;
      
     }
 
