@@ -5,13 +5,17 @@
  */
 package jeuLettre;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.geometry.VPos;
+import javafx.scene.Node;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
@@ -33,6 +37,7 @@ public class LettresPane extends Region {
     private Text pressText;
     private double curseurTexte;
     private int mode = 1;
+    final List<Timeline> timelines = new ArrayList<Timeline>();
 
     private void titre(){
     // create press keys text
@@ -70,6 +75,7 @@ public class LettresPane extends Region {
     }
 
     private void listen(String c) {
+        System.out.print(c);
         if (c.matches("[\\w\\t\\n\\x0b\\fs]")) {
             creerLettre(c);
         } else {
@@ -79,8 +85,11 @@ public class LettresPane extends Region {
             if ("é".equals(c)) {
                 this.mode = 2;
             }
-            if ("\r".equals(c)){
+            if ("²".equals(c)){
                 nettoyer();
+            }
+            if ("\r".equals(c)){
+                descendre();
             }
         }
     }
@@ -107,7 +116,8 @@ public class LettresPane extends Region {
         letter.setTranslateY((getHeight() - letter.getBoundsInLocal().getHeight()) / 2);
         getChildren().add(letter);
         // over 4 seconds move letter to random position and fade it out
-        final Timeline timeline = new Timeline();
+        Timeline timeline = new Timeline();
+        timelines.add(timeline);
         if(mode == 1){
         timeline.getKeyFrames().add(new KeyFrame(Duration.seconds(4), (ActionEvent event) -> {
             getChildren().remove(letter);
@@ -129,11 +139,42 @@ public class LettresPane extends Region {
     }
 
     private void nettoyer() {
-        getChildren().clear();
-        titre();
-        getChildren().add(pressText);
+        int i =1;
+        for(Timeline t : timelines){
+            t.stop(); 
+            ObservableList<Node> n = getChildren();
+            Text letter = (Text) n.get(i);
+            t.getKeyFrames().clear();
+            t.getKeyFrames().add(new KeyFrame(Duration.seconds(1), (ActionEvent event) -> {
+                getChildren().remove(letter);      
+            }, new KeyValue(letter.translateYProperty(), getHeight() + letter.getBoundsInLocal().getHeight(), INTERPOLATOR), new KeyValue(letter.opacityProperty(), 0f)));
+            t.play();
+            i++;
+        }
         curseurTexte = 0.0;
-     
+    }
+
+    private void descendre() {
+        int i = 1;
+        double curseurTexteRedefinie=0.0;
+        
+        for (Timeline t : timelines) {
+            t.stop();
+            ObservableList<Node> n = getChildren();
+            Text letter = (Text) n.get(i);
+            t.getKeyFrames().clear();
+            t.getKeyFrames().add(new KeyFrame(Duration.seconds(1), 
+                    new KeyValue(letter.translateYProperty(), getHeight() - letter.getBoundsInLocal().getHeight(), INTERPOLATOR),
+                    new KeyValue(letter.translateXProperty(), curseurTexteRedefinie, INTERPOLATOR)));
+            t.getKeyFrames().add(new KeyFrame(Duration.seconds(10), (ActionEvent event) -> {
+                getChildren().remove(letter);
+                curseurTexte -= (letter.getBoundsInLocal().getWidth());
+            },  new KeyValue(letter.opacityProperty(), 75f)));
+            curseurTexteRedefinie +=  (letter.getBoundsInLocal().getWidth());
+            t.play();
+            i++;
+        }
+        curseurTexte = Math.max(curseurTexteRedefinie, 0.0);
     }
 
 }
