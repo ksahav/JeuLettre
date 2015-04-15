@@ -75,7 +75,6 @@ public class LettresPane extends Region {
     }
 
     private void listen(String c) {
-        System.out.print(c);
         if (c.matches("[\\w\\t\\n\\x0b\\fs]")) {
             creerLettre(c);
         } else {
@@ -85,10 +84,10 @@ public class LettresPane extends Region {
             if ("é".equals(c)) {
                 this.mode = 2;
             }
-            if ("²".equals(c)){
+            if ("'".equals(c)){
                 nettoyer();
             }
-            if ("\r".equals(c)){
+            if ("-".equals(c)){
                 descendre();
             }
         }
@@ -139,7 +138,7 @@ public class LettresPane extends Region {
     }
 
     private void nettoyer() {
-        int i =1;
+        int i =0;
         for(Timeline t : timelines){
             t.stop(); 
             ObservableList<Node> n = getChildren();
@@ -155,7 +154,7 @@ public class LettresPane extends Region {
     }
 
     private void descendre() {
-        int i = 1;
+        int i = 0;
         double curseurTexteRedefinie=0.0;
         
         for (Timeline t : timelines) {
